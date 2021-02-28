@@ -4,6 +4,7 @@ To create application were used PHP programming language to create RESTful API f
 
 ## Install dependencies
 cd frontend
+
 npm install
 
 ## Create database
@@ -11,8 +12,6 @@ Import database from "database.sql" file
 
 ## Start application
 ### Start php web server
-
-cd api
 
 php -S localhost:8000
 
