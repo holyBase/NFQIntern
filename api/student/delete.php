@@ -11,13 +11,15 @@ $student = new Student($db);
 
 $data = json_decode(file_get_contents("php://input"));
 
-$student->student_id = $data->student_id;
-if ($student->delete()) {
-    echo json_encode(
-        array('message' => 'Student deleted')
-    );
-} else {
-    echo json_encode(
-        array('message' => 'Student not deleted')
-    );
+if (!empty($data->student_id)) {
+    $student->student_id = $data->student_id;
+    if ($student->delete()) {
+        echo json_encode(
+            array('message' => 'Student deleted')
+        );
+    } else {
+        echo json_encode(
+            array('message' => 'Student not deleted')
+        );
+    }
 }

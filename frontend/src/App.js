@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Col, Container, Row, Table } from 'react-bootstrap';
 
-const apiUrl = "http://localhost:80/api";
+const apiUrl = "http://localhost:8000/api";
 
 class App extends Component {
 
@@ -17,18 +17,22 @@ class App extends Component {
       students_per_group: 0,
       showForm: false,
       student_fullname: '',
-      selectedGroupID: 0,
     }
+  }
+
+  refreshPage() {
+    window.location.reload(false);
   }
 
   componentDidMount() {
     this.getData();
-    this.interval = setInterval(() => this.getData(), 1000);
+    this.interval = setInterval(() => this.getData(), 10000);
   };
 
   componentWillUnmount() {
     clearInterval(this.interval);
   }
+
 
   getData() {
     Promise.all([
@@ -64,7 +68,7 @@ class App extends Component {
           number_of_groups: this.state.number_of_groups,
           students_per_group: this.state.students_per_group,
         })
-      });
+      }).then(this.refreshPage());
     } catch (error) {
       console.log(error);
     }
@@ -90,11 +94,11 @@ class App extends Component {
           project_id: this.getProjectID(),
           student_fullname: this.state.student_fullname,
         })
-      });
+      }).then(this.refreshPage());
     } catch (error) {
       console.log(error);
     }
-    this.setState({ showForm: false, student_fullname: '' })
+    this.setState({ showForm: false, student_fullname: '' });
   }
 
   deleteStudentHandler = e => {
@@ -109,7 +113,7 @@ class App extends Component {
         body: JSON.stringify({
           student_id: e.target.id,
         })
-      });
+      }).then(this.refreshPage());
     } catch (error) {
       console.log(error);
     }
@@ -149,7 +153,7 @@ class App extends Component {
           group_id: e.target.name,
           is_assigned: true,
         })
-      });
+      }).then(this.refreshPage());
     } catch (error) {
       console.log(error);
     }
@@ -184,104 +188,116 @@ class App extends Component {
     const { project_name, number_of_groups, students_per_group } = this.state;
 
     if (!isLoaded) {
-      return <div>Loading...</div>
+      return <Container><h2>Loading...</h2></Container>
     } else if (projects.length === 0) {
       return (
-        <div>
+        <Container>
           <form onSubmit={this.createProjectHandler}>
-            <div>
+            <Container>
+              <label padding="50px">Project name: </label>
               <input
                 type="text"
                 name="project_name"
                 value={project_name}
-                onChange={this.changeHandler} />
-            </div>
-            <div>
+                placeholder="Project name"
+                onChange={this.changeHandler}
+                min="0" />
+            </Container>
+            <Container>
+              <label>Number of groups: </label>
               <input
                 type="number"
                 name="number_of_groups"
                 value={number_of_groups}
-                onChange={this.changeHandler} />
-            </div>
-            <div>
+                placeholder="Number of groups"
+                onChange={this.changeHandler}
+                min="0" />
+            </Container>
+            <Container>
+              <label>Students per group: </label>
               <input
                 type="number"
                 name="students_per_group"
                 value={students_per_group}
-                onChange={this.changeHandler} />
-            </div>
-            <button type="submit">Submit</button>
+                onChange={this.changeHandler}
+                min="0" />
+            </Container>
+            <Container>
+              <Button variant="secondary" type="submit">Create project</Button>
+            </Container>
           </form>
-        </div>
+        </Container>
       )
     } else {
       return (
-        <div>
-          <div>
+        <Container>
+          <Container>
             <h2>Status page mockup</h2>
             {
-              projects.map(item => (
-                <div key={item.project_id} margin="50px">
-                  <p>Project: <b>{item.project_name}</b></p>
-                  <p>Number of groups: <b>{item.number_of_groups}</b></p>
-                  <p>Students per group: <b>{item.students_per_group}</b></p>
+              projects.map(project => (
+                <div key={project.project_id} margin="50px">
+                  <p>Project: <b>{project.project_name}</b></p>
+                  <p>Number of groups: <b>{project.number_of_groups}</b></p>
+                  <p>Students per group: <b>{project.students_per_group}</b></p>
                 </div>
               ))
             }
-          </div>
-          <br></br>
-          <div>
-            <h2>Students</h2>
-            <Table bordered hover responsive>
-              <thead>
-                <tr>
-                  <th>Student</th>
-                  <th>Group</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map(student => (
-                  <tr key={student.student_id} >
-                    <td>
-                      {student.student_fullname}
-                    </td>
-                    <td text-align="center">
-                      {student.assigned_group_id === null ? '-' : student.assigned_group_id}
-                    </td>
-                    <td>
-                      <Button variant="link" onClick={this.deleteStudentHandler} id={student.student_id}>Delete</Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-            <Button variant="secondary" onClick={() => this.setState({ showForm: true })}>Add new student</Button>
-            {this.state.showForm ? this.showNewStudentForm() : null}
-          </div>
+          </Container>
           <br></br>
           <Container>
-            <Row>
-              <h2>Groups</h2>
+            <h2>Students</h2>
+            <Row xs={1} md={2}>
+              <Table bordered hover responsive>
+                <thead align="center">
+                  <tr>
+                    <th>Student</th>
+                    <th>Group</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody align="center">
+                  {students.map(student => (
+                    <tr key={student.student_id} >
+                      <td>
+                        {student.student_fullname}
+                      </td>
+                      <td>
+                        {student.assigned_group_id === null ? '-' : student.assigned_group_id}
+                      </td>
+                      <td>
+                        <Button variant="link" onClick={this.deleteStudentHandler} id={student.student_id}>Delete</Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Row>
+            <Button variant="secondary" onClick={() => this.setState({ showForm: true })}>Add new student</Button>
+            {this.state.showForm ? this.showNewStudentForm() : null}
+          </Container>
+          <br></br>
+          <Container>
+            <h2>Groups</h2>
+            <Row xs={2} md={4} lg={6}>
               {groups.map(group => (
                 <Col key={group.group_id} sm>
-                  <table key={group.group_id} value={group.students_per_group}>
-                    <thead>
+                  <Table bordered hover responsive key={group.group_id} value={group.students_per_group}>
+                    <thead align="center">
                       <tr>
                         <th>
                           <h4>Group #{group.group_id}</h4>
                         </th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody align="center">
                       {this.renderSelect(group.group_id, group.students_per_group)}
                     </tbody>
-                  </table>
+                  </Table>
                 </Col>
               ))}
             </Row>
           </Container>
-        </div>
+        </Container>
 
       )
     }
