@@ -15,7 +15,7 @@ Import database from "database.sql" file
 
 php -S localhost:8000
 
-### Start react web application:
+### Start react web application
 
 cd frontend
 
